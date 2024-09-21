@@ -4,7 +4,8 @@ const express = require("express");
 const app = express();
 require("dotenv").config();
 
-app.use(express.json())
+app.use(express.json());
+
 app.post("/signup", async (req, res) => {
   try {
     const userData = req.body;
