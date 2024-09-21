@@ -48,7 +48,12 @@ const userSchema = new Schema({
   skills: {
     type: [String],
   },
-});
+},
+{
+  timestamps:true
+}
+
+);
 
 // Model should start with Capital letter
 // like a class
