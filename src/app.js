@@ -17,6 +17,16 @@ app.post("/signup", async (req, res) => {
   }
 });
 
+// getting all users
+app.get("/feed", async (req, res) => {
+  try {
+    const users = await User.find();
+    res.status(200).send(users);
+  } catch (err) {
+    res.status(400).send(err.message);
+  }
+});
+
 const PORT = 4000;
 
 connectToDB().then(() =>
