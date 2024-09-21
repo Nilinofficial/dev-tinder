@@ -4,14 +4,22 @@ const userSchema = new Schema({
   firstName: {
     type: String,
     required: true,
+    minLength: 3,
+    maxLenth: 20,
   },
   lastName: {
     type: String,
     required: true,
+    minLength: 1,
+    maxLenth: 20,
   },
   email: {
     type: String,
+    lowercase: true,
     required: true,
+    unique: true,
+    trim: true,
+    // trim is used to remove white space
   },
   password: {
     type: String,
@@ -20,10 +28,25 @@ const userSchema = new Schema({
   age: {
     type: Number,
     required: true,
+    min: 18,
   },
   gender: {
     type: String,
     required: true,
+    validate(value) {
+      if (!["male", "female", "others"].includes(value)) {
+        throw new Error("Enter a valid gender");
+      }
+    },
+  },
+  profilePhotoUrl: {
+    type: String,
+  },
+  about: {
+    type: String,
+  },
+  skills: {
+    type: [String],
   },
 });
 
