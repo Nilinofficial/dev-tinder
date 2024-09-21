@@ -1,14 +1,13 @@
-const {authUser} = require('./middleware/auth.js')
+const { connectToDB } = require("./config/database.js");
 const express = require("express");
 const app = express();
+require('dotenv').config()
+
 
 const PORT = 4000;
 
-app.use("/user",authUser);
-app.use("/user/details",(req,res) => {
-res.status(200).send("user found")
-})
-
-app.listen(PORT, () => {
-  console.log("server is listening on  port", PORT);
-});
+connectToDB().then(() =>
+  app.listen(PORT, () => {
+    console.log("server is listening on  port", PORT);
+  })
+);
