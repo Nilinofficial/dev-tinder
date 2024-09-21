@@ -1,15 +1,13 @@
+const { connectToDB } = require("./config/database.js");
 const express = require("express");
 const app = express();
+require('dotenv').config()
+
 
 const PORT = 4000;
 
-app.use("/",(req, res) => {
-  res.send(`server started`);
-});
-app.use("/dashboard",(req, res) => {
-    res.send(`server dashboard started`);
-  });
-
-app.listen(PORT, () => {
-  console.log("server is listening on  port", PORT);
-});
+connectToDB().then(() =>
+  app.listen(PORT, () => {
+    console.log("server is listening on  port", PORT);
+  })
+);
