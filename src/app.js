@@ -7,14 +7,13 @@ require("dotenv").config();
 app.use(express.json());
 
 app.post("/signup", async (req, res) => {
+  const userData = req.body;
+  const user = new User(userData);
   try {
-    const userData = req.body;
-    const user = new User(userData);
-
     await user.save();
     res.status(200).send("user created successfully");
   } catch (err) {
-    res.status(500).send("Error creating user: " + err.message);
+    res.status(500).send("Error creating user " + err.message);
   }
 });
 
