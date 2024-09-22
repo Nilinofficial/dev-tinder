@@ -71,17 +71,13 @@ app.get("/feed", async (req, res) => {
 app.get("/profile", async (req, res) => {
   const cookies = req.cookies;
   const { token } = req.cookies;
-  console.log(cookies);
   if (!token) {
     return res.status(401).send("You need to login to fetch the profile");
   }
 
   try {
     const decodedId = jwt.verify(token, process.env.TOKEN_SECRET_KEY);
-    console.log(decodedId);
-
     const user = await User.findOne({ _id: decodedId._id });
-    console.log(user);
 
     if (user) {
       res.send("profile fetched successfully");
