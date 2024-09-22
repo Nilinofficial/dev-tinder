@@ -10,16 +10,43 @@ require("dotenv").config();
 app.use(express.json());
 
 app.post("/signup", async (req, res) => {
-  const { firstName, lastName, email, password,gender,age} = req.body;
+  const { firstName, lastName, email, password, gender, age } = req.body;
 
   try {
     await validateSignUp(req);
-    const passwordHash = await  bcrypt.hash(password, 10);
-    const user = new User({ firstName, lastName, email, password:passwordHash,gender,age });
+    const passwordHash = await bcrypt.hash(password, 10);
+    const user = new User({
+      firstName,
+      lastName,
+      email,
+      password: passwordHash,
+      gender,
+      age,
+    });
     await user.save();
     res.status(200).send("user created successfully");
   } catch (err) {
     res.status(500).send(err.message);
+  }
+});
+
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await  User.findOne({ email });
+    if (!user) {
+      throw new Error("Invalid Credentials");
+    }
+    const validPassword = await bcrypt.compare(password, user.password);
+    if (!validPassword) {
+      throw new Error("Invalid Credentials");
+    }
+    if (validPassword) {
+      res.status(200).send("user logged in");
+    }
+  } catch (err) {
+    res.status(400).send(err.message);
   }
 });
 
