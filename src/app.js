@@ -2,30 +2,24 @@ const { connectToDB } = require("./config/database.js");
 const User = require("./models/user.js");
 const express = require("express");
 const app = express();
-var validator = require('validator');
+const { validateSignUp } = require("./utils/validation.js");
+const bcrypt = require("bcrypt");
+
 require("dotenv").config();
 
 app.use(express.json());
 
 app.post("/signup", async (req, res) => {
-  const userData = req.body;
-  const email = req.body.email;
-  const isValidEmail =  validator.isEmail(email);
-  
-  if(!isValidEmail) {
-    throw new Error("email not valid")
-  }
+  const { firstName, lastName, email, password,gender,age} = req.body;
 
-  if (userData.skills.length > 10) {
-    throw new Error("skills cannot be more than 10");
-  }
-
-  const user = new User(userData);
   try {
+    await validateSignUp(req);
+    const passwordHash = await  bcrypt.hash(password, 10);
+    const user = new User({ firstName, lastName, email, password:passwordHash,gender,age });
     await user.save();
     res.status(200).send("user created successfully");
   } catch (err) {
-    res.status(500).send("Error creating user " + err.message);
+    res.status(500).send(err.message);
   }
 });
 
