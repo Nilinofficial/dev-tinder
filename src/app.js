@@ -2,12 +2,19 @@ const { connectToDB } = require("./config/database.js");
 const User = require("./models/user.js");
 const express = require("express");
 const app = express();
+var validator = require('validator');
 require("dotenv").config();
 
 app.use(express.json());
 
 app.post("/signup", async (req, res) => {
   const userData = req.body;
+  const email = req.body.email;
+  const isValidEmail =  validator.isEmail(email);
+  
+  if(!isValidEmail) {
+    throw new Error("email not valid")
+  }
 
   if (userData.skills.length > 10) {
     throw new Error("skills cannot be more than 10");
