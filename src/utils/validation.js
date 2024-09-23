@@ -4,7 +4,7 @@ const validateSignUp = (req) => {
   const { firstName, lastName, email, skills } = req.body;
 
   if (!firstName) {
-    throw new Error("First Name is required");
+ throw new Error("First Name is required");   
   }
   if (!lastName) {
     throw new Error("Last Name is required");
