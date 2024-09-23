@@ -7,6 +7,8 @@ const bcrypt = require("bcrypt");
 var cookieParser = require("cookie-parser");
 var jwt = require("jsonwebtoken");
 
+const { userAuth } = require("./middleware/auth.js");
+
 require("dotenv").config();
 
 app.use(express.json());
@@ -27,9 +29,9 @@ app.post("/signup", async (req, res) => {
       age,
     });
     await user.save();
-    res.status(200).send("user created successfully");
+    res.status(200).json({ message: "User created successfully" });
   } catch (err) {
-    res.status(500).send(err.message);
+    res.status(500).json({ message: err.message });
   }
 });
 
@@ -39,17 +41,14 @@ app.post("/login", async (req, res) => {
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      throw new Error("Invalid Credentials");
+      return res.status(404).json({ message: "Invalid credentials" });
     }
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      throw new Error("Invalid Credentials");
+      return res.status(404).json({ message: "Invalid credentials" });
     }
     if (validPassword) {
-      // create a JWT Token
-      const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET_KEY);
-
-      // sending cookie after successful login
+      const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
       res.cookie("token", token);
       res.status(200).send("user logged in");
     }
@@ -58,71 +57,12 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// getting all users
-app.get("/feed", async (req, res) => {
+app.get("/profile", userAuth, async (req, res) => {
   try {
-    const users = await User.find();
-    res.status(200).send(users);
+    const user = req.user;
+    res.send(user);
   } catch (err) {
     res.status(400).send(err.message);
-  }
-});
-
-app.get("/profile", async (req, res) => {
-  const cookies = req.cookies;
-  const { token } = req.cookies;
-  if (!token) {
-    return res.status(401).send("You need to login to fetch the profile");
-  }
-
-  try {
-    const decodedId = jwt.verify(token, process.env.TOKEN_SECRET_KEY);
-    const user = await User.findOne({ _id: decodedId._id });
-
-    if (user) {
-      res.send("profile fetched successfully");
-    } else {
-      return res.status(400).send("Invalid token or user not found");
-    }
-  } catch (err) {
-    return res.status(400).send("Invalid token or error fetching profile");
-  }
-});
-
-app.patch("/user/:userId", async (req, res) => {
-  const userId = req.params?.userId;
-  const data = req.body;
-
-  const ALLOWED_UPDATES = [
-    "skills",
-    "age",
-    "gender",
-    "about",
-    "profilePhotoUrl",
-  ];
-
-  try {
-    const isUpdateAllowed = Object.keys(data).every((k) =>
-      ALLOWED_UPDATES.includes(k)
-    );
-
-    if (!isUpdateAllowed) {
-      throw new Error("Cannot updates those fields");
-    }
-
-    if (data.skills.length > 10) {
-      throw new Error("skills cannot be more than 10");
-    }
-
-    const updatedValues = await User.findByIdAndUpdate({ _id: userId }, data, {
-      runValidators: true,
-      returnDocument: "after",
-    });
-    console.log(updatedValues);
-
-    res.status(200).send("user updated successfully");
-  } catch (err) {
-    res.send("error occured" + err.message);
   }
 });
 
