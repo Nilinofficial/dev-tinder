@@ -43,13 +43,15 @@ app.post("/login", async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "Invalid credentials" });
     }
-    const validPassword = await bcrypt.compare(password, user.password);
+    const validPassword = await user.validatePassword(password);
     if (!validPassword) {
-      return res.status(404).json({ message: "Invalid credentials" });
+      return res.status(404).json({ message: "Invalid credentials" });  
     }
     if (validPassword) {
-      const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
-      res.cookie("token", token);
+      const token = await user.generateJWTToken();
+      res.cookie("token", token, {
+        expires: new Date(Date.now() + 8 * 360000),
+      });
       res.status(200).send("user logged in");
     }
   } catch (err) {
